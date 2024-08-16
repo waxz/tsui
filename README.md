@@ -13,7 +13,6 @@ We built this because, while Tailscale has lovely desktop apps for macOS and Win
 Some things we want to add in the future:
 
 - Multiple accounts and custom login URLs
-- Better behavior on small terminals
 - A menu of all accessible network devices
 
 <img width="1037" alt="Screenshot of tsui" src="https://github.com/user-attachments/assets/5593f8be-d2ab-4f64-ac79-0c285e018b68">
