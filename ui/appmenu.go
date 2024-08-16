@@ -62,7 +62,7 @@ type Appmenu struct {
 }
 
 // Render the menu to a string.
-func (appmenu *Appmenu) Render() string {
+func (appmenu *Appmenu) Render(height int) string {
 	if len(appmenu.items) == 0 {
 		return ""
 	}
@@ -79,7 +79,7 @@ func (appmenu *Appmenu) Render() string {
 	// Render the submenu to the right of the appmenu.
 	return lipgloss.JoinHorizontal(lipgloss.Top,
 		s.String(),
-		appmenu.items[appmenu.cursor].Submenu.Render(appmenu.isOpen))
+		appmenu.items[appmenu.cursor].Submenu.Render(appmenu.isOpen, height))
 }
 
 // Move the cursor to the next selectable item in the currently active menu.
@@ -136,7 +136,6 @@ func (appmenu *Appmenu) Activate() tea.Cmd {
 	} else if len(appmenu.items) > 0 {
 		// Open the submenu.
 		appmenu.isOpen = true
-		appmenu.items[appmenu.cursor].Submenu.ResetCursor()
 	}
 	return nil
 }
@@ -149,4 +148,5 @@ func (appmenu *Appmenu) IsSubmenuOpen() bool {
 // Close the submenu.
 func (appmenu *Appmenu) CloseSubmenu() {
 	appmenu.isOpen = false
+	appmenu.items[appmenu.cursor].Submenu.ResetCursor()
 }

@@ -383,15 +383,72 @@ type Submenu struct {
 	cursor      int
 }
 
-// Render the submenu to a string.
-func (submenu *Submenu) Render(isSubmenuOpen bool) string {
-	var s strings.Builder
-	for i, item := range submenu.items {
-		if i > 0 {
-			s.WriteByte('\n')
+// Render the submenu to a fixed-height string with scrolling.
+func (submenu *Submenu) Render(isSubmenuOpen bool, height int) string {
+	// Calculate the area of the menu we're gonna render.
+	topOverflow := false
+	bottomOverflow := false
+	rangeStart := 0
+	rangeEnd := len(submenu.items)
+
+	if height < rangeEnd {
+		if submenu.cursor < height-1 {
+			bottomOverflow = true
+			rangeEnd = height - 1
+		} else if submenu.cursor > len(submenu.items)-3 {
+			topOverflow = true
+			rangeStart = len(submenu.items) - height + 1
+		} else {
+			topOverflow = true
+			bottomOverflow = true
+			rangeStart = 3 + submenu.cursor - height
+			rangeEnd = rangeStart + height - 2
 		}
-		s.WriteString(item.render(i == submenu.cursor && item.isSelectable(), isSubmenuOpen))
 	}
+
+	// Clamp the range so we NEVER crash.
+	rangeStart = max(0, rangeStart)
+	rangeEnd = max(rangeStart, min(rangeEnd, len(submenu.items)))
+
+	// Render it.
+	var inner strings.Builder
+
+	for i, item := range submenu.items[rangeStart:rangeEnd] {
+		if i > 0 {
+			inner.WriteByte('\n')
+		}
+		itemPos := rangeStart + i
+		inner.WriteString(item.render(itemPos == submenu.cursor && item.isSelectable(), isSubmenuOpen))
+	}
+
+	// Do an aligned-bottom crop to compensate for multiline items.
+	nonOverflowHeight := height
+	if topOverflow {
+		nonOverflowHeight--
+	}
+	if bottomOverflow {
+		nonOverflowHeight--
+	}
+
+	lines := strings.Split(inner.String(), "\n")
+	startLine := min(len(lines), max(0, len(lines)-nonOverflowHeight))
+	lines = lines[startLine:]
+
+	// And add the overflow indicators.
+	overflow := lipgloss.NewStyle().
+		Background(DarkGray).
+		MarginLeft(2).
+		Render("...")
+
+	var s strings.Builder
+	if topOverflow {
+		s.WriteString(overflow + "\n")
+	}
+	s.WriteString(strings.Join(lines, "\n"))
+	if bottomOverflow {
+		s.WriteString("\n" + overflow)
+	}
+
 	return s.String()
 }
 

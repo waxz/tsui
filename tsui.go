@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -145,9 +146,15 @@ func main() {
 	// Enable "alternate screen" mode, a terminal convention designed for rendering
 	// full-screen, interactive UIs.
 	p := tea.NewProgram(m, tea.WithAltScreen())
+
+	// Run the UI. This will return when the UI exits or errors.
 	finalModel, err := p.Run()
 	if err != nil {
 		mainError(err)
+	}
+	if finalModel == nil {
+		// This sometimes happens when runtime panics occur.
+		mainError(errors.New("looks like tsui crashed :("))
 	}
 	m = finalModel.(model)
 

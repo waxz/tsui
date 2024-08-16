@@ -245,7 +245,7 @@ func (m model) View() string {
 	case ipn.Running.String():
 		middle = lipgloss.NewStyle().
 			Height(middleHeight).
-			Render(m.menu.Render())
+			Render(m.menu.Render(middleHeight))
 
 	case ipn.NeedsMachineAuth.String():
 		// TODO: Figure out what this state actually is so we can be helpful to the user.
