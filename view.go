@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/neuralinkcorp/tsui/browser"
+	"github.com/neuralinkcorp/tsui/libts"
 	"github.com/neuralinkcorp/tsui/ui"
 	"tailscale.com/ipn"
 )
@@ -269,8 +269,7 @@ func (m model) View() string {
 			lines = append(lines,
 				fmt.Sprintf(`Login URL: %s`, styledAuthUrl),
 			)
-			if browser.IsSupported() {
-				// We can't open the browser for them if running as the root user on Linux.
+			if libts.StartLoginInteractiveWillOpenBrowser() {
 				lines = append(lines,
 					``,
 					`Press . to open in browser.`,
@@ -294,7 +293,9 @@ func (m model) View() string {
 		if m.state.AuthURL == "" {
 			middle = renderMiddleBanner(&m, middleHeight, ui.PoggersAnimationFrame(m.animationT))
 		} else {
-			// If we have an AuthURL in the Starting state, that means the user is reauthenticating!
+			// If we have an AuthURL in the Starting state, that means the user is reauthenticating.
+			// TODO: This case only seems to show up sometimes, and may not anymore (?) in the latest
+			// version of Tailscale.
 			lines := []string{
 				lipgloss.NewStyle().
 					Bold(true).
@@ -302,7 +303,7 @@ func (m model) View() string {
 				``,
 				fmt.Sprintf(`Login URL: %s`, styledAuthUrl),
 			}
-			if browser.IsSupported() {
+			if libts.StartLoginInteractiveWillOpenBrowser() {
 				// We can't open the browser for them if running as the root user on Linux.
 				lines = append(lines,
 					``,

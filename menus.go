@@ -259,14 +259,8 @@ func (m *model) updateMenus() {
 
 				&ui.LabeledSubmenuItem{
 					Label: reauthenticateButtonLabel,
-					OnActivate: func() tea.Msg {
-						// Reauthenticating is basically the same as the first-time login flow.
-						err := libts.StartLoginInteractive(ctx)
-						if err != nil {
-							return errorMsg(err)
-						}
-						return successMsg("Starting reauthentication. This may take a few seconds.")
-					},
+					// Reauthenticating is basically the same as the first-time login flow.
+					OnActivate: startLoginInteractive,
 				},
 
 				&ui.LabeledSubmenuItem{
