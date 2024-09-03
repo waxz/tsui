@@ -127,7 +127,9 @@ func GetState(ctx context.Context) (State, error) {
 
 		if peer.ExitNodeOption {
 			state.ExitNodes = append(state.ExitNodes, peer)
-		} else if peer.UserID == status.Self.UserID {
+		}
+
+		if peer.UserID == status.Self.UserID {
 			state.MyNodes = append(state.MyNodes, peer)
 		} else if peer.IsTagged() {
 			state.TaggedNodes = append(state.TaggedNodes, peer)
