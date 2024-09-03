@@ -12,10 +12,10 @@ We built this because, while Tailscale has lovely desktop apps for macOS and Win
 
 Some things we want to add in the future:
 
+- Ability to start the daemon on macOS
 - Multiple accounts and custom login URLs
-- A menu of all accessible network devices
 
-<img width="1037" alt="Screenshot of tsui" src="https://github.com/user-attachments/assets/5593f8be-d2ab-4f64-ac79-0c285e018b68">
+<img width="1017" alt="Screenshot of tsui" src="https://github.com/user-attachments/assets/34e1ab81-42f2-4853-af27-a41f9d839fba">
 
 ## Installation
 
