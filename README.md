@@ -8,11 +8,13 @@ We built this because, while Tailscale has lovely desktop apps for macOS and Win
 - Switch exit nodes and compare their latency
 - View and copy debug information
 - See your bandwidth
+- See and copy IP addresses of accessible peers
 - Easily log in, out, and reauthenticate
 
 Some things we want to add in the future:
 
-- Ability to start the daemon on macOS
+- More useful peer options
+- Start the daemon on macOS
 - Multiple accounts and custom login URLs
 
 <img width="1017" alt="Screenshot of tsui" src="https://github.com/user-attachments/assets/34e1ab81-42f2-4853-af27-a41f9d839fba">
