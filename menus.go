@@ -11,9 +11,50 @@ import (
 	"github.com/neuralinkcorp/tsui/libts"
 	"github.com/neuralinkcorp/tsui/ui"
 	"tailscale.com/ipn"
+	"tailscale.com/ipn/ipnstate"
 	"tailscale.com/types/opt"
 	"tailscale.com/types/preftype"
 )
+
+func buildNetworkDevicesSubmenuSection(title string, peers []*ipnstate.PeerStatus) []ui.SubmenuItem {
+	items := []ui.SubmenuItem{
+		&ui.TitleSubmenuItem{Label: title},
+	}
+
+	if len(peers) == 0 {
+		items = append(items, &ui.DividerSubmenuItem{})
+	} else {
+		for _, peer := range peers {
+			peerName := libts.PeerName(peer)
+
+			// Normalize the capitalization of the OS, because some are capitalized but some aren't.
+			osName := peer.OS
+			switch osName {
+			case "android":
+				osName = "Android"
+			case "windows":
+				osName = "Windows"
+			case "linux":
+				osName = "Linux"
+			}
+
+			items = append(items, &ui.LabeledSubmenuItem{
+				Label:           peerName,
+				AdditionalLabel: osName,
+				OnActivate: func() tea.Msg {
+					err := clipboard.WriteString(peer.TailscaleIPs[0].String())
+					if err != nil {
+						return errorMsg(err)
+					}
+					return successMsg(fmt.Sprintf("Copied IP address of %s.", peerName))
+				},
+				IsDim: false,
+			})
+		}
+	}
+
+	return items
+}
 
 // Update all of the menu UIs from the current state.
 func (m *model) updateMenus() {
@@ -124,7 +165,7 @@ func (m *model) updateMenus() {
 
 		// Update the exit node submenu.
 		{
-			exitNodeItems := make([]ui.SubmenuItem, 2+len(m.state.SortedExitNodes))
+			exitNodeItems := make([]ui.SubmenuItem, 2+len(m.state.ExitNodes))
 			exitNodeItems[0] = &ui.ToggleableSubmenuItem{
 				LabeledSubmenuItem: ui.LabeledSubmenuItem{
 					Label: "None",
@@ -139,7 +180,7 @@ func (m *model) updateMenus() {
 				IsActive: m.state.CurrentExitNode == nil,
 			}
 			exitNodeItems[1] = &ui.DividerSubmenuItem{}
-			for i, exitNode := range m.state.SortedExitNodes {
+			for i, exitNode := range m.state.ExitNodes {
 				// Offset for the "None" item and the divider.
 				i += 2
 
@@ -169,6 +210,37 @@ func (m *model) updateMenus() {
 
 			m.exitNodes.AdditionalLabel = m.state.CurrentExitNodeName
 			m.exitNodes.Submenu.SetItems(exitNodeItems)
+		}
+
+		// Update the network devices submenu.
+		{
+			networkNodes := make([]ui.SubmenuItem, 0)
+
+			networkNodes = append(networkNodes,
+				buildNetworkDevicesSubmenuSection("My Devices", m.state.MyNodes)...)
+			networkNodes = append(networkNodes,
+				&ui.SpacerSubmenuItem{})
+			networkNodes = append(networkNodes,
+				buildNetworkDevicesSubmenuSection("Tagged Devices", m.state.TaggedNodes)...)
+
+			for _, key := range m.state.OwnedNodeKeys {
+				if key == "" {
+					key = "<none>"
+				}
+
+				networkNodes = append(networkNodes,
+					&ui.SpacerSubmenuItem{})
+				networkNodes = append(networkNodes,
+					buildNetworkDevicesSubmenuSection(key, m.state.OwnedNodes[key])...)
+			}
+
+			lenSum := len(m.state.MyNodes) + len(m.state.TaggedNodes)
+			for _, value := range m.state.OwnedNodes {
+				lenSum += len(value)
+			}
+
+			m.networkDevices.AdditionalLabel = fmt.Sprintf("%d visible", lenSum)
+			m.networkDevices.Submenu.SetItems(networkNodes)
 		}
 
 		// Update the settings submenu.
@@ -338,6 +410,7 @@ func (m *model) updateMenus() {
 		m.menu.SetItems([]*ui.AppmenuItem{
 			m.deviceInfo,
 			m.exitNodes,
+			m.networkDevices,
 			m.settings,
 		})
 	} else {

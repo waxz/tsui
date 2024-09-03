@@ -58,10 +58,11 @@ type model struct {
 	canWrite bool
 
 	// Main menu.
-	menu       ui.Appmenu
-	deviceInfo *ui.AppmenuItem
-	exitNodes  *ui.AppmenuItem
-	settings   *ui.AppmenuItem
+	menu           ui.Appmenu
+	deviceInfo     *ui.AppmenuItem
+	exitNodes      *ui.AppmenuItem
+	networkDevices *ui.AppmenuItem
+	settings       *ui.AppmenuItem
 
 	// Current width of the terminal.
 	terminalWidth int
@@ -92,7 +93,8 @@ func initialModel() (model, error) {
 		exitNodes: &ui.AppmenuItem{Label: "Exit Nodes",
 			Submenu: ui.Submenu{Exclusivity: ui.SubmenuExclusivityOne},
 		},
-		settings: &ui.AppmenuItem{Label: "Settings"},
+		networkDevices: &ui.AppmenuItem{Label: "Network Devices"},
+		settings:       &ui.AppmenuItem{Label: "Settings"},
 	}
 
 	state, err := libts.GetState(ctx)
@@ -113,7 +115,7 @@ func (m model) Init() tea.Cmd {
 		// Perform our initial state fetch to populate menus
 		updateState,
 		// Run an initial batch of pings.
-		makeDoPings(m.state.SortedExitNodes),
+		makeDoPings(m.state.ExitNodes),
 		// Kick off our ticks.
 		tea.Tick(tickInterval, func(_ time.Time) tea.Msg {
 			return tickMsg{}
