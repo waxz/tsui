@@ -69,7 +69,8 @@ void writeString(unsigned char *buf, size_t n, uintptr_t statusHandle)
             return;
 
         // Someone wants to paste our data.
-        case SelectionRequest:
+        case SelectionRequest: 
+            {
             XSelectionRequestEvent *xsr = &event.xselectionrequest;
 
             if (xsr->selection != clipboardAtom)
@@ -116,7 +117,8 @@ void writeString(unsigned char *buf, size_t n, uintptr_t statusHandle)
                 XSendEvent(display, ev.requestor, 0, 0, (XEvent *)&ev);
             }
 
-            break;
+            break; 
+            }
         }
     }
 }
